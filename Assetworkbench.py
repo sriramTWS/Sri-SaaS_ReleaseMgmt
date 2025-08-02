@@ -13,7 +13,7 @@ app.config["DEBUG"] = True
 
 @app.route('/', methods=['GET'])
 def home():
-    return "<h1>HR Agent for Leave Balances Leave Application Cancelling Leaves</h1><p>This site is a prototype API for UnO Use Cases</p>"
+    return "<h1>Asset Management Workbench</h1><p>This site is a prototype API for UnO Use Cases</p>"
 
 Leave ={
   "InterfaceName": "GenerateAssetJournals",
@@ -283,4 +283,5 @@ def put_data():
      del test["_id"]
      print(test)
      return jsonify({'result' : test}) 
+
 app.run(host="0.0.0.0", port=5000)
