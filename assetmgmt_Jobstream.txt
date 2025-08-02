@@ -1,0 +1,1233 @@
+---
+kind: JobStream
+def:
+  folder: /
+  name: ASSET_ACTION_WORKFLOW
+  workstation: /CLOUD
+  service:
+    name: Action_On_Asset
+    published: false
+    description: Action on Asset on requests like "Place an Asset in Maintenance Mode"
+    variables:
+    - type: radioGroup
+      name: Action
+      displayName: Action
+      description: Action
+      required: true
+      choices:
+      - displayName: Maintenance
+        value: Maintenance
+        selected: true
+      - displayName: Inspection
+        value: Inspection
+        selected: false
+    - type: integer
+      name: AssetNumber
+      displayName: AssetNumber
+      description: AssetNumber
+      placeholder: 10100
+      required: true
+  outputProperties:
+  - name: AssetStatus_In_Maximo
+    value: "${jobs.PLACE_ASSET_MAINT_MODE_IN_MAXIMO.JSONResult}"
+  - name: Oracle_Fusion_Output
+    value: "${jobs.PLACE_ASSET_MAINT_MODE_IN_ORACLE_FUSION.JSONResult}"
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: PLACE_ASSET_MAINT_MODE_IN_MAXIMO
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/maxrest/rest/mbo/ASSET/10100/action=MAINT
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    resourceDependencies: []
+  - name: PLACE_ASSET_MAINT_MODE_IN_ORACLE_FUSION
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/300000045689822
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: PLACE_ASSET_MAINT_MODE_IN_MAXIMO
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+
+
+---
+kind: JobStream
+def:
+  folder: /
+  name: ASSET_TRANSFER
+  workstation: /CLOUD
+  description: Transfers an Asset
+  service:
+    name: ASSET_TRANSFER
+    published: false
+    description: Transfer an asset based on requests like "Transfer of Asset by Asset
+      ID FCL-2023-8801 to YARD-GCC" etc.
+    variables:
+    - type: string
+      name: Asset_ID
+      displayName: Asset ID
+      description: AssetID
+      placeholder: FCL-2023-8801
+      required: true
+    - type: string
+      name: From
+      displayName: From
+      description: From
+      required: false
+    - type: string
+      name: To
+      displayName: To
+      description: To
+      placeholder: YARD-GCC
+      required: true
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: GET_ASSET_TRANSFER_STATUS
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/assettransferstatus/AssetNumber/FCL-2023-8801
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    resourceDependencies: []
+  - name: UPDATE_OWNSERHIP_ORACLE_FUSION
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/3000001992022/updateownership
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: GET_ASSET_TRANSFER_STATUS
+    resourceDependencies: []
+  - name: UPDATE_OWNERSHIP_IN_MAXIMO
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/maximo/oslc/os/mxasset/_QVNTRVROVU1fPVwiRkNMLTIwMjMtODgwMVwi
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: UPDATE_OWNSERHIP_ORACLE_FUSION
+    resourceDependencies: []
+  - name: TRIGGER_ASSET_MOVEMENT_NOTIFICATIONS
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/api/now/table/sc_task
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: UPDATE_OWNERSHIP_IN_MAXIMO
+    resourceDependencies: []
+  - name: CONFIRM_TRANSFER
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/completed/3000001992022
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: TRIGGER_ASSET_MOVEMENT_NOTIFICATIONS
+    resourceDependencies: []
+
+
+---
+kind: JobStream
+def:
+  folder: /
+  name: AUCTION_ASSET
+  workstation: /CLOUD
+  service:
+    name: AUCTION_ASSET
+    published: false
+    description: "Auction an asset based on requests like \"Auctioning of Assets by\
+      \ Asset ID 300,000,099,821,456 , Minimum Bid Value 10000 , Auction Date  31/05/2025\""
+    variables:
+    - type: string
+      name: Asset_ID
+      displayName: Asset ID
+      description: Asset_ID
+      placeholder: 300000099821456
+      required: true
+    - type: string
+      name: MIN_BID_VALUE
+      displayName: MINIMUM BID VALUE
+      description: MINIMUM BID VALUE
+      placeholder: 10000
+      required: true
+    - type: string
+      name: Auction_Date
+      displayName: Auction Date
+      description: Auction Date
+      placeholder: 31/05/2025
+      required: true
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: ASSET_ELIGIBILITY_TEST_AUCTION
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/yardauction/AssetNumber/PLT-9901
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    resourceDependencies: []
+  - name: AUCTION_ITEMS
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/auction/items
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: ASSET_ELIGIBILITY_TEST_AUCTION
+    resourceDependencies: []
+  - name: PUSH_ASSET_TO_AUCTION_PLATFORM
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/auction/events/EVT-20240527/items/AUC-55431/submit
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: AUCTION_ITEMS
+    resourceDependencies: []
+
+
+---
+kind: JobStream
+def:
+  folder: /
+  name: CAPITIZATION_CIP_ASSETS
+  workstation: /CLOUD
+  service:
+    name: CAPTIZATON_CIP_ASSETS
+    published: false
+    description: "Capitize an Asset based on requests like \"Capitalization of CIP\
+      \ Assets CIP101 by Date 30/05/2025 by Asset Cost 15,000, Asset Category : PLAT&MACHINERY\
+      \ ,Asset Book : CORPORATE, Depreciation Method : STHL\""
+    variables:
+    - type: string
+      name: ASSET_ID
+      displayName: ASSET ID
+      description: ASSET ID
+      placeholder: CIP101
+      required: true
+    - type: string
+      name: Capitalize_DATE
+      displayName: Capitalization Date
+      description: Capitalization Date
+      placeholder: 30/05/2025
+      required: true
+    - type: integer
+      name: Asset_Cost
+      displayName: Asset Cost
+      description: Asset Cost
+      placeholder: 15000
+      required: true
+    - type: string
+      name: Asset_Category
+      displayName: Asset Category
+      description: Asset Category
+      placeholder: PLANT&MACHINERY
+      required: true
+    - type: string
+      name: Asset_Book
+      displayName: Asset Book
+      description: Asset Book
+      placeholder: CORPORATE
+      required: true
+    - type: string
+      name: Dep_Method
+      displayName: Depreciation Method
+      description: Depreciation Method
+      placeholder: STHL
+      required: true
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: CHECK_READINESS_CAPTIZATION
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/CIP101
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    resourceDependencies: []
+  - name: CAPITIZE_ASSET_BYASSETID_ORACLE_FUSION
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/captizationofAssets
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: CHECK_READINESS_CAPTIZATION
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+  - name: GENERATE_ACCOUNTING_ENTRIES
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/journals/JournalCategoryCode/Asset
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: CAPITIZE_ASSET_BYASSETID_ORACLE_FUSION
+    resourceDependencies: []
+
+
+---
+kind: JobStream
+def:
+  folder: /
+  name: QUERY_ASSET
+  workstation: /CLOUD
+  service:
+    name: Query_An_Asset
+    published: false
+    description: Used to Query an Asset by Asset ID
+    variables:
+    - type: integer
+      name: AssetID
+      displayName: Asset ID
+      description: Asset ID
+      placeholder: 10100
+      required: true
+  variableTable: /ASSET
+  outputProperties:
+  - name: Asset_Status
+    value: "${result.items.AssetStatus}"
+    description: Asset Status
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: QUERY_ASSET_ORACLE_FUSION
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/AssetNumber/10100
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: "${jobs.QUERY_ASSET_ORACLE_FUSION.JSONResult}"
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+
+
+---
+kind: JobStream
+def:
+  folder: /
+  name: RETIRE_ASSET
+  workstation: /CLOUD
+  service:
+    name: RETIRE_ASSET
+    published: false
+    description: "Retire an Asset based on requests like \"Retirement of Asset by\
+      \ Asset ID 300,000,099,821,456\""
+    variables:
+    - type: string
+      name: Asset_ID
+      displayName: Asset_ID
+      description: Asset_ID
+      placeholder: 300000099821456
+      required: true
+  saturdayIsFree: true
+  sundayIsFree: true
+  priority: 10
+  asap: false
+  perJobLatestStart: false
+  lateStartAction: doNotRun
+  matchingCriteria:
+    type: previous
+  resourceDependencies: []
+  jobs:
+  - name: GET_FIXED_ASSET
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/PLT-9901
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    resourceDependencies: []
+  - name: RETIRE_ASSET
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmService/AssetRetirementsService/WSDL
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: GET_FIXED_ASSET
+    resourceDependencies: []
+  - name: RETIRE_ASSET_IN_ORACLE_FUSION
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmService/AssetRetirementsService/WSDL
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: RETIRE_ASSET
+    resourceDependencies: []
+  - name: CREATE_ACCOUNTING_ENTRIES
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/CreateAccounting
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: RETIRE_ASSET_IN_ORACLE_FUSION
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+  - name: GENERATE_RETIREMENT_JOURNAL_ENTRIES
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/journals/JournalSourceCode/Assets/AccountingDate/20240526
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: ACCOUNTING_ENTRIES_IN_ERP
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+  - name: SET_STATUS_RETIRED
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/fixedAssets/AssetNumber/300000099821456
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: GENERATE_RETIREMENT_JOURNAL_ENTRIES
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+  - name: MAXIMO_AUDIT_RECORD_RETIRED_ASSET
+    workstation: /CLOUD
+    jobDefinition:
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/maximo/oslc/os/auditlog
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              FileBodyR:
+                InputFileNameR: ""
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: 0
+              RetryIntervalSecondsR: 30
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    internalPredecessors:
+    - jobName: SET_STATUS_RETIRED
+    resourceDependencies: []
+  - name: ACCOUNTING_ENTRIES_IN_ERP
+    workstation: /CLOUD
+    jobDefinition:
+      description: ""
+      type: restful
+      task:
+        restful:
+          AuthenticationR:
+            credentialsR:
+              ConnectionTab:
+                noneAuthentication: ""
+            HostnameVerifyCheckboxR: false
+            CertificateGroupR:
+              keyStoreFilePathR: ""
+              keyStorePasswordR: ""
+          ActionR:
+            uriR: http://172.17.0.1:5000/fscmRestApi/resources/11.13.18.05/erpintegrations
+            methodR: get
+            queryparamsR: {}
+            headersR: {}
+            AcceptR: ""
+            contentTypeR: ""
+            BodyGroupR:
+              TextBodyR:
+                InputTextBodyR: "{\n\t\"InterfaceName\": \"GenerateAssetJournals\"\
+                  ,\n\t\"RequestParameters\": [\n\t  {\n\t\t\"Name\": \"LedgerId\"\
+                  ,\n\t\t\"Value\": \"2021\"\n\t  },\n\t  {\n\t\t\"Name\": \"AssetBook\"\
+                  ,\n\t\t\"Value\": \"CORPORATE\"\n\t  }\n\t]\n  }"
+            EnableVerboseLog: false
+          AdvancedR:
+            outputFileNameR: ""
+            JSONPropertiesGroupR:
+              JsonObjectResultQueryR: ""
+            RetryOptionsGroupR:
+              NumberOfRetriesR: ""
+              RetryIntervalSecondsR: ""
+          AsyncTracking:
+            TrackingTab:
+              noneTracking: ""
+      recovery:
+        action: STOP
+        repeatAffinity: false
+    priority: 10
+    asap: false
+    lateStartAction: doNotRun
+    lateAction: continue
+    internalPredecessors:
+    - jobName: CREATE_ACCOUNTING_ENTRIES
+    resourceDependencies: []
+    minDurationAction: continue
+    maxDurationAction: continue
+    skipLateAction: overlap
+
